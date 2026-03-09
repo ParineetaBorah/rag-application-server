@@ -1,7 +1,10 @@
 # Python
 __pycache__/
+**/__pycache__/
 *.py[cod]
 *$py.class
+*.cpython-*.pyc
+*.cpython-*.pyo
 *.so
 .Python
 build/
@@ -47,7 +50,10 @@ instance/
 
 # OS
 .DS_Store
+**/.DS_Store
 Thumbs.db
+.temp/
+
 
 # Logs
 *.log
@@ -61,3 +67,8 @@ htmlcov/
 
 # FastAPI specific
 .pytest_cache
+
+
+# Supabase
+dump.rdb
+supabase/.temp
