@@ -11,13 +11,14 @@ from src.middleware.logging_middleware import LoggingMiddleware
 configure_logging()
 logger = get_logger(__name__)
 
-logger.info("initializing_application", version="1.0.0")
+logger.info("initializing_application", version="1.0.4")
 
 # Create FastAPI app
 app = FastAPI(
     title="Six-Figure AI Engineering API",
     description="Backend API for Six-Figure AI Engineering application",
-    version="1.0.0",
+    version="1.0.2",
+    redirect_slashes=False
 )
 
 # Add logging middleware (should be first to capture all requests)
@@ -40,6 +41,12 @@ app.include_router(projectFilesRoutes, prefix="/api/projects")
 app.include_router(chatRoutes, prefix="/api/chats")
 
 logger.info("routes_registered", route_count=4)
+
+@app.get("/")
+async def root():
+    """Root endpoint."""
+    logger.debug("root_called")
+    return {"name": "RAG app AI Engineering API", "status": "running"}
 
 @app.get("/health")
 async def health_check():
