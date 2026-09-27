@@ -62,7 +62,11 @@ def process_document(document_id: str):
         return {"success": True, "document_id": document_id, "chunks_created": len(processed_chunks)}
     except Exception as e:
         logger.error("document_processing_failed", document_id=document_id, error=str(e), exc_info=True)
-        raise Exception(f"Failed to process document {document_id}: {str(e)}")
+        try:
+            update_status_in_database(document_id, ProcessingStatus.FAILED, {ProcessingStatus.FAILED.value: {"error": str(e)}})
+        except Exception:
+            pass
+        raise Exception(f"Failed to process document {document_id}: {str(e)}") from e
 
 
 def update_status_in_database(
