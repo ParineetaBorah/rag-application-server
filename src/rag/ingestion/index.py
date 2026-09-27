@@ -63,9 +63,11 @@ def process_document(document_id: str):
     except Exception as e:
         logger.error("document_processing_failed", document_id=document_id, error=str(e), exc_info=True)
         try:
-            update_status_in_database(document_id, ProcessingStatus.FAILED, {ProcessingStatus.FAILED.value: {"error": str(e)}})
-        except Exception:
-            pass
+            status_result = supabase.table("project_documents").select("processing_status").eq("id", document_id).execute()
+            failed_step = status_result.data[0]["processing_status"] if status_result.data else None
+            update_status_in_database(document_id, ProcessingStatus.FAILED, {ProcessingStatus.FAILED.value: {"step": failed_step, "error": str(e)}})
+        except Exception as status_error:
+            logger.error("mark_document_failed_error", document_id=document_id, error=str(status_error))
         raise Exception(f"Failed to process document {document_id}: {str(e)}") from e
 
 
