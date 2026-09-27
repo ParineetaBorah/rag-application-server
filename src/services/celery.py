@@ -61,4 +61,4 @@ def perform_rag_ingestion_task(document_id: str):
         )
     except Exception as e:
         logger.error("document_processing_failed", document_id=document_id, error=str(e), exc_info=True)
-        return f"Failed to process document {document_id}: {str(e)}"
+        raise

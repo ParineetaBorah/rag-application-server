@@ -43,6 +43,7 @@ class ProcessingStatus(str, Enum):
     SUMMARISING = "summarising"
     VECTORIZATION = "vectorization"
     COMPLETED = "completed"
+    FAILED = "failed"
 
 
 class UrlRequest(BaseModel):
