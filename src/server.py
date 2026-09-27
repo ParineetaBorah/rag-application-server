@@ -17,7 +17,7 @@ logger.info("initializing_application", version="1.0.4")
 app = FastAPI(
     title="Six-Figure AI Engineering API",
     description="Backend API for Six-Figure AI Engineering application",
-    version="1.0.2",
+    version="1.0.4",
     redirect_slashes=False
 )
 
