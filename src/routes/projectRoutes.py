@@ -1,3 +1,4 @@
+import asyncio
 from typing import Dict, List
 from fastapi import APIRouter, HTTPException, Depends
 from src.agents.simple_agent.agent import create_simple_rag_agent
@@ -34,7 +35,7 @@ router = APIRouter(tags=["projectRoutes"])
 """
 
 @router.get("")
-async def get_projects(current_user_clerk_id: str = Depends(get_current_user_clerk_id)):
+def get_projects(current_user_clerk_id: str = Depends(get_current_user_clerk_id)):
     """
     ! Logic Flow
     * 1. Get current user clerk_id
@@ -69,7 +70,7 @@ async def get_projects(current_user_clerk_id: str = Depends(get_current_user_cle
 
 
 @router.post("")
-async def create_project(
+def create_project(
     project_data: ProjectCreate,
     current_user_clerk_id: str = Depends(get_current_user_clerk_id),
 ):
@@ -156,7 +157,7 @@ async def create_project(
 
 
 @router.delete("/{project_id}")
-async def delete_project(
+def delete_project(
     project_id: str, current_user_clerk_id: str = Depends(get_current_user_clerk_id)
 ):
     """
@@ -223,7 +224,7 @@ async def delete_project(
 
 
 @router.get("/{project_id}")
-async def get_project(
+def get_project(
     project_id: str, current_user_clerk_id: str = Depends(get_current_user_clerk_id)
 ):
     """
@@ -269,7 +270,7 @@ async def get_project(
 
 
 @router.get("/{project_id}/chats")
-async def get_project_chats(
+def get_project_chats(
     project_id: str, current_user_clerk_id: str = Depends(get_current_user_clerk_id)
 ):
     """
@@ -312,7 +313,7 @@ async def get_project_chats(
 
 
 @router.get("/{project_id}/settings")
-async def get_project_settings(
+def get_project_settings(
     project_id: str, current_user_clerk_id: str = Depends(get_current_user_clerk_id)
 ):
     """
@@ -364,7 +365,7 @@ async def get_project_settings(
 
 
 @router.put("/{project_id}/settings")
-async def update_project_settings(
+def update_project_settings(
     project_id: str,
     settings: ProjectSettings,
     current_user_clerk_id: str = Depends(get_current_user_clerk_id),
@@ -503,7 +504,7 @@ def get_chat_history(chat_id: str, exclude_message_id: str = None) -> List[Dict[
 
 
 @router.post("/{project_id}/chats/{chat_id}/messages")
-async def send_message(
+def send_message(
     project_id: str,
     chat_id: str,
     message: MessageCreate,
@@ -542,7 +543,7 @@ async def send_message(
 
         # Step 2 : Get project settings to retrieve agent_type
         try:
-            project_settings = await get_project_settings(project_id, current_user_clerk_id)
+            project_settings = get_project_settings(project_id, current_user_clerk_id)
             agent_type = project_settings["data"].get("agent_type", "simple")
         except Exception as e:
             logger.warning("settings_retrieval_failed_defaulting_to_simple", error=str(e))
@@ -640,8 +641,8 @@ async def stream_message(
                 "clerk_id": clerk_id,
                 "role": MessageRole.USER.value,
             }
-            message_creation_result = (
-                supabase.table("messages").insert(message_insert_data).execute()
+            message_creation_result = await asyncio.to_thread(
+                supabase.table("messages").insert(message_insert_data).execute
             )
             if not message_creation_result.data:
                 logger.error("message_creation_failed", chat_id=chat_id, reason="no_data_returned") 
@@ -654,7 +655,7 @@ async def stream_message(
             
             # Step 2: Get project settings for agent_type
             try:
-                project_settings = await get_project_settings(project_id)
+                project_settings = await asyncio.to_thread(get_project_settings, project_id, clerk_id)
                 agent_type = project_settings["data"].get("agent_type", "simple")
             except Exception as e:
                 logger.warning("settings_retrieval_failed_defaulting_to_simple", error=str(e))
@@ -759,8 +760,8 @@ async def stream_message(
                 "role": MessageRole.ASSISTANT.value,
                 "citations": citations,
             }
-            ai_response_creation_result = (
-                supabase.table("messages").insert(ai_response_insert_data).execute()
+            ai_response_creation_result = await asyncio.to_thread(
+                supabase.table("messages").insert(ai_response_insert_data).execute
             )
             
             if not ai_response_creation_result.data:

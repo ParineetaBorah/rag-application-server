@@ -8,7 +8,7 @@ router = APIRouter(tags=["userRoutes"])
 
 
 @router.post("/create")
-async def create_user(clerk_webhook_data: dict):
+def create_user(clerk_webhook_data: dict):
     """
     Payload structure : https://clerk.com/docs/guides/development/webhooks/overview#payload-structure
 
